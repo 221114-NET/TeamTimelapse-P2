@@ -1,7 +1,9 @@
 # TeamTimelapse-P2
 
-<h2>Front End:<h2>
-<br>
+## TimeLapse ERD
+![TimeLapse ERD](TimeLapse.ERD.svg)
+
+## Front End:
 
 TimeLapse Store is using several frontend technologies to achieve a smooth and clear user experience.
 

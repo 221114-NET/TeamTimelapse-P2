@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Timelapse.Models\Timelapse.Models.csproj" />
     <ProjectReference Include="..\Timelapse.Logic\Timelapse.Logic.csproj" />
+    <ProjectReference Include="..\Timelapse.Repo\Timelapse.Repo.csproj" />
   </ItemGroup>
 
 </Project>

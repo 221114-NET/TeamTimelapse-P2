@@ -1,5 +1,7 @@
 # TeamTimelapse-P2
 
+![TimeLapse ERD](TimeLapse.ERD.svg)
+
 <h2>Front End:<h2>
 <br>
 

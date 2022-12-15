@@ -1,6 +1,7 @@
 # TeamTimelapse-P2
 
 ## TimeLapse ERD
+https://drive.google.com/file/d/1PvgIt9ylCNVOfN9ijPt7imEOMzgiDk8J/view?usp=sharing
 ![TimeLapse ERD](TimeLapse.ERD.svg)
 
 ## Front End:

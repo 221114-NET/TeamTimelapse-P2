@@ -1,3 +1,6 @@
+using Timelapse.Logic;
+using Timelapse.Repo;
+
 namespace Timelapse.Api;
 
 public class Program
@@ -12,6 +15,9 @@ public class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+
+        builder.Services.AddScoped<IBusinessLayerClass, BusinessLayerClass>();
+        builder.Services.AddScoped<IRepoLayerClass, RepoLayerClass>();
 
         var app = builder.Build();
 

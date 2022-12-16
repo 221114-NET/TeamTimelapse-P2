@@ -16,8 +16,8 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        builder.Services.AddScoped<IBusinessLayerClass, BusinessLayerClass>();
-        builder.Services.AddScoped<IRepoLayerClass, RepoLayerClass>();
+        builder.Services.AddScoped<IUserLogic, UserLogic>();
+        builder.Services.AddScoped<IUserRepo, UserRepo>();
 
         var app = builder.Build();
 

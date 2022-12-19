@@ -11,13 +11,15 @@ public class Program
 
         // Add services to the container.
 
+        string connectionString = File.ReadAllText("./../ConnString.txt");
+
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        builder.Services.AddScoped<IBusinessLayerClass, BusinessLayerClass>();
-        builder.Services.AddScoped<IRepoLayerClass, RepoLayerClass>();
+        builder.Services.AddScoped<IUserLogic, UserLogic>();
+        builder.Services.AddScoped<IUserRepo, UserRepo>();
 
         var app = builder.Build();
 

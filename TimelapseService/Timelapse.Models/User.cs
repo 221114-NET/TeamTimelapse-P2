@@ -30,7 +30,7 @@ namespace Timelapse.Models
         public string Address1 { get; set; }
 
 
-        [Display(Name = "Primary Address")]
+        [Display(Name = "Secondary Address")]
         public string Address2 { get; set; }
 
 

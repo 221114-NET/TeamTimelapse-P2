@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+
+    <script src="main.js"></script>
+
+    <div class="container">
+        <form class="form" id="login">
+            <h1>Login</h1>
+            <div class="formMessage formErrorMessage"></div>
+            <div class="textBoxdiv">
+                <input type="text" class="formInput" autofocus placeholder="Email">
+                <div class="inputErrorMessage"></div>
+            </div>
+            <div class="textBoxdiv">
+                <input type="password" class="formInput " placeholder="Password">
+                <div class="inputErrorMessage"></div>
+            </div>
+            <button type="submit" class="loginBtn">Sign In</button>
+            <p class="formText">
+                <a href="#" class="formLink">Forgot your password?</a>
+            </p>
+
+            <p class="formText">
+
+                </br>
+                <a id="linkCreateAccount" class="formLink"> Don't have an account? Create account</a>
+            </p>
+        </form>
+        <form class="form formHidden " id="createAccount">
+            <h1>Create Account</h1>
+            <div class="formMessage formErrorMessage"></div>
+            <div class="textBoxdiv">
+                <input type="text" class="formInput" autofocus placeholder="First Name">
+                <div class="inputErrorMessage"></div>
+            </div>
+            <div class="textBoxdiv">
+                <input type="text" class="formInput" autofocus placeholder="Last Name">
+                <div class="inputErrorMessage"></div>
+            </div>
+            <div class="textBoxdiv">
+                <input type="text" class="formInput" autofocus placeholder="Email">
+                <div class="inputErrorMessage"></div>
+            </div>
+            <div class="textBoxdiv">
+                <input type="password" class="formInput " placeholder="Password">
+                <div class="inputErrorMessage"></div>
+            </div>
+            <div class="textBoxdiv">
+                <input type="password" class="formInput " placeholder="Confirm Password">
+                <div class="inputErrorMessage"></div>
+            </div>
+           
+            <button type="submit" class="loginBtn">Continue</button>
+            
+            <p class="formText">
+
+                </br>
+                <a id="linkLogin" class="formLink"> Already have an account? Sign in</a>
+            </p>
+        </form>
+    </div>
+</body>
+
+</html>

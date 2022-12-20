@@ -5,18 +5,19 @@ using System.Threading.Tasks;
 
 namespace Timelapse.Models
 {
-    public class Cart
+    public class ItemLine
     {
         public Guid OrderId { get; set; }
-        public Guid CustomerId { get; set; }
         public Guid WatchId { get; set; }
+        public Watch Model { get; set; }
+        public int Quantity { get; set; }
 
-        public Cart() {}
-        public Cart(Guid orderId, Guid customerId, Guid watchId)
+        public ItemLine() {}
+        public ItemLine(Guid orderId, Guid watchId, int quantity)
         {
             OrderId = orderId;
-            CustomerId = customerId;
             WatchId = watchId;
+            Quantity = quantity;
         }
     }
 }

@@ -56,5 +56,16 @@ namespace Timelapse.Models
             State = state;
             Country = country;
         }
+
+        public User(Guid tempId, string firstName, string lastName, string emailAddress, string address1, int zipCode, string state)
+        {
+            UserId = tempId;
+            FirstName = firstName;
+            LastName = lastName;
+            EmailAddress = emailAddress;
+            Address1 = address1;
+            ZipCode = zipCode;
+            State = state;
+        }
     }
 }

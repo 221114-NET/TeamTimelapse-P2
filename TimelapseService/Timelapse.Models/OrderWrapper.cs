@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 
 namespace Timelapse.Models
 {
-    public class CartWrapper
+    public class OrderWrapper
     {
         public User User { get; set; }
-        public List<CartItemLine> Watches { get; set; }
+        public List<ItemLine> Watches { get; set; }
 
-        public CartWrapper() {}
-        public CartWrapper(User user, List<CartItemLine> watches)
+        public OrderWrapper() {}
+        public OrderWrapper(User user, List<ItemLine> watches)
         {
             User = user;
             Watches = watches;

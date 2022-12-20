@@ -9,22 +9,22 @@ using Timelapse.Models;
 namespace Timelapse.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class Timelapse : ControllerBase
+    [Route("[controller]")]
+    public class UserApi : ControllerBase
     {
-        private readonly IBusinessLayerClass _ibus;
+        private readonly IUserLogic _ibus;
 
-        public Timelapse (IBusinessLayerClass ibus)
+        public UserApi (IUserLogic ibus)
         {
             _ibus = ibus;
         }
 
 
-        [HttpPost("RegisterAccount")]
-        public ActionResult<Register> PostAccount(Register r)
+        [HttpPost("UserAccount")]
+        public ActionResult<User> PostAccount(User r)
         {
 
-            Register r1 = this._ibus.PostAccount(r);
+            User r1 = this._ibus.PostAccount(r);
             return r1;
 
        

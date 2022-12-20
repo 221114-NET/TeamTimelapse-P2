@@ -27,16 +27,17 @@ namespace Timelapse.Models
         public string Password { get; set; }
 
         [Display(Name = "Primary Address")]
-        [Required(ErrorMessage = "Primary Address is required")]
         public string Address1 { get; set; }
+
+
+        [Display(Name = "Primary Address")]
         public string Address2 { get; set; }
 
+
         [Display(Name = "Zip Code")]
-        [Required(ErrorMessage = "Zip Code is required")]
         public int ZipCode { get; set; }
 
         [Display(Name = "State")]
-        [Required(ErrorMessage = "State is required")]
         public string State { get; set; }
 
         [Display(Name = "Country")]

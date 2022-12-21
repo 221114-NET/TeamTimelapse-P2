@@ -12,6 +12,7 @@ body{
     align-items: center;
     justify-items: center;
     font-size: 18px;
+    font: 100 1rem 'Dancing Script', sans-serif;
 }
 
 
@@ -24,9 +25,7 @@ body{
     border-radius: var(border-radius);
 
 }
-.{
-    font: 500 1rem 'Dancing Script', sans-serif;
-}
+
 
 .formHidden{
     display: none;
@@ -108,7 +107,7 @@ h1{
 .inputErrorMessage{
     margin-top: 0.5rem;
     font-size: 0.85rem;
-    color: var(--color-error);
+    color: red;
 }
 
 .loginBtn{

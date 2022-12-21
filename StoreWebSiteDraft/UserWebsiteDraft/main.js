@@ -8,7 +8,13 @@ function setFormMessage(formElement, type, message){
 //setFormMessage(loginForm, "success", "You're logged in!")
 
 function setInputError(inputElement, message){
-    inputElement.classList.add("")
+    inputElement.classList.add("formInput--error")
+    inputElement.parentElement.querySelector(".inputErrorMessage").textContent = message;
+}
+
+function clearInputError(inputElement) {
+    inputElement.classList.remove("formInput--error");
+    inputElement.parentElement.querySelector(".inputErrorMessage").textContent = message;
 }
 
 
@@ -29,6 +35,18 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
 
         //Ajax/fetch login
-        setFormMessage(loginForm, "error", "Invalid username/password combination");
-    })
+        setFormMessage(loginForm, "error", "Invalid Email/password combination");
+    });
+
+    document.querySelectorAll("formInput").forEach(inputElement => {
+        inputElement.addEventListener("blur", e => {
+            if(e.target.id === "signupPassword" && e.target.value.length > 0 && e.target.value.length < 6) {
+                setInputError(inputElement, "Password must be at least 6 charachters in length")
+            }
+        });
+
+        inputElement.addEventListener("input", e => {
+            clearInputError(inputElement);
+        });
+    });
 });

@@ -21,20 +21,29 @@ namespace Timelapse.Repo
 
         public async Task PostOrder(OrderWrapper order)
         {
+            double orderTotal = 0.0;
+
+            foreach(ItemLine watch in order.Watches)
+            {
+                orderTotal = watch.Quantity * watch.Model.Price;
+            }
+
             // Insert order into db
             using SqlConnection connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            string cmdText = $"INSERT INTO dbo.Orders(customerId) VALUES(@customerId);"; // INSERT command
+            string cmdText = $"INSERT INTO dbo.orders(CustomerId, OrderDate, OrderTotal) VALUES(@customerId, @orderDate, @orderTotal);"; // INSERT command
 
             using SqlCommand insertCmd = new SqlCommand(cmdText, connection);
             insertCmd.Parameters.AddWithValue("@customerId", order.User.UserId);
+            insertCmd.Parameters.AddWithValue("@orderDate", DateTime.Now);
+            insertCmd.Parameters.AddWithValue("@orderTotal", orderTotal);
 
             try { await insertCmd.ExecuteNonQueryAsync(); } catch (Exception e) { _logger.LogError(e, e.Message); }
 
             // check to see order was inserted into db
             Guid orderId = Guid.Empty;
 
-            cmdText = $"SELECT orderId FROM dbo.Orders WHERE customerId = @customerId;"; // SELECT order
+            cmdText = $"SELECT OrderId FROM dbo.orders WHERE CustomerId=@customerId;"; // SELECT order
 
             using SqlCommand selectCmd = new SqlCommand(cmdText, connection);
             selectCmd.Parameters.AddWithValue("@customerId", order.User.UserId);
@@ -50,7 +59,7 @@ namespace Timelapse.Repo
             {
                 foreach (ItemLine watch in order.Watches)
                 {
-                    cmdText = $"INSERT INTO dbo.ItemLine(orderId, watchId, quantity VALUES (@orderId, @watchId, @quantity);";
+                    cmdText = $"INSERT INTO dbo.itemLine(OrderId, WatchId, Quantity) VALUES (@orderId, @watchId, @quantity);";
 
                     using SqlCommand cmd = new SqlCommand(cmdText, connection);
                     cmd.Parameters.AddWithValue("@orderId", orderId);
@@ -60,7 +69,7 @@ namespace Timelapse.Repo
                     try { await cmd.ExecuteNonQueryAsync(); } catch (Exception e) { _logger.LogError(e, e.Message); }
                 }
             }
-            
+
             await connection.CloseAsync();
         }
 
@@ -68,14 +77,14 @@ namespace Timelapse.Repo
         {
             List<Order> orders = new List<Order>();
 
-            Guid userId = new Guid();
+            Guid userId = Guid.Empty;
             List<Guid> orderIds = new List<Guid>();
 
             using SqlConnection connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
 
             // Get user Id
-            string cmdText = "SELECT userId FROM dbo.Users WHERE email = @email;";
+            string cmdText = "SELECT UserId FROM dbo.users WHERE UserEmail=@email;";
             using SqlCommand cmd1 = new SqlCommand(cmdText, connection);
             cmd1.Parameters.AddWithValue("@email", email);
             using SqlDataReader reader1 = await cmd1.ExecuteReaderAsync();
@@ -86,7 +95,7 @@ namespace Timelapse.Repo
             }
 
             // Getting orders
-            cmdText = $"SELECT orderId FROM Orders WHERE customerId=@userId;";
+            cmdText = $"SELECT OrderId FROM dbo.orders WHERE CustomerId=@userId;";
 
             using SqlCommand cmd2 = new SqlCommand(cmdText, connection);
             cmd2.Parameters.AddWithValue("@userId", userId);
@@ -104,18 +113,36 @@ namespace Timelapse.Repo
             foreach (Guid orderId in orderIds)
             {
                 List<ItemLine> itemLines = new List<ItemLine>();
-                cmdText = $"SELECT watchId, quantity FROM ItemLine WHERE orderId=@orderId";
+                DateTime orderDate = DateTime.MinValue;
+                double orderTotal = 0.0;
 
-                using SqlCommand cmd = new(cmdText, connection);
-                cmd.Parameters.AddWithValue("@orderId", orderId);
-                using SqlDataReader reader = await cmd.ExecuteReaderAsync();
+                // Get Order info
+                cmdText = $"SELECT OrderDate, OrderTotal FROM orders WHERE OrderId=@orderId";
 
-                while (await reader.ReadAsync())
+                using SqlCommand orderCmd = new SqlCommand(cmdText, connection);
+                orderCmd.Parameters.AddWithValue("@orderId", orderId);
+                using SqlDataReader orderReader = await orderCmd.ExecuteReaderAsync();
+
+                while (await orderReader.ReadAsync())
                 {
-                    Guid watchId = reader.GetGuid(0);
-                    int quantity = reader.GetInt32(1);
+                    orderDate = orderReader.GetDateTime(0);
+                    orderTotal = orderReader.GetDouble(1);
+                }
 
-                    ItemLine tmpLine = new ItemLine(orderId, watchId, quantity);
+                // Get ItemLine info
+                cmdText = $"SELECT OrderId, WatchId, Quantity FROM itemLine WHERE OrderId=@orderId";
+
+                using SqlCommand lineCmd = new SqlCommand(cmdText, connection);
+                lineCmd.Parameters.AddWithValue("@orderId", orderId);
+                using SqlDataReader lineReader = await lineCmd.ExecuteReaderAsync();
+
+                while (await lineReader.ReadAsync())
+                {
+                    Guid newOrderId = lineReader.GetGuid(0);
+                    Guid watchId = lineReader.GetGuid(1);
+                    int quantity = lineReader.GetInt32(2);
+
+                    ItemLine tmpLine = new ItemLine(newOrderId, watchId, quantity);
 
                     itemLines.Add(tmpLine);
                 }
@@ -123,7 +150,7 @@ namespace Timelapse.Repo
                 // get list of watches per order
                 foreach (var item in itemLines)
                 {
-                    cmdText = $"SELECT watchId, watchBrand, watchName FROM dbo.Watches WHERE watchId=@watchId";
+                    cmdText = $"SELECT WatchId, WatchBrand, WatchName, Price FROM dbo.watches WHERE WatchId=@watchId";
                     using SqlCommand watchCmd = new SqlCommand(cmdText, connection);
                     watchCmd.Parameters.AddWithValue("@watchId", item.WatchId);
                     using SqlDataReader watchReader = await watchCmd.ExecuteReaderAsync();
@@ -132,14 +159,15 @@ namespace Timelapse.Repo
                     {
                         Guid watchId = watchReader.GetGuid(0);
                         string brand = watchReader.GetString(1);
-                        string name = watchReader.GetString(1);
+                        string name = watchReader.GetString(2);
+                        double price = watchReader.GetDouble(3);
 
-                        Watch tempWatch = new Watch(watchId, brand, name);
+                        Watch tempWatch = new Watch(watchId, brand, name, price);
                         item.Model = tempWatch;
                     }
                 }
 
-                orders.Add(new Order(orderId, userId, itemLines));
+                orders.Add(new Order(orderId, userId, orderDate, orderTotal, itemLines));
             }
 
             await connection.CloseAsync();
@@ -157,25 +185,25 @@ namespace Timelapse.Repo
             await connection.OpenAsync();
 
             // Get user info
-            string cmdText = $"SELECT userId, firstName, lastName, emailAddress, address1, zipCode, state FROM dbo.User WHERE userId=@userId;";
+            string cmdText = $"SELECT UserId, FirstName, LastName, UserEmail, Address, ZipCode, [State] FROM dbo.user WHERE UserId=@userId;";
             using SqlCommand userCmd = new SqlCommand(cmdText, connection);
             userCmd.Parameters.AddWithValue("@userId", userId);
             using SqlDataReader userReader = await userCmd.ExecuteReaderAsync();
 
             while (await userReader.ReadAsync())
             {
-                // TODO: add mapper
+                // TODO: add mapper?
                 user.UserId = userReader.GetGuid(0);
                 user.FirstName = userReader.GetString(1);
                 user.LastName = userReader.GetString(2);
                 user.EmailAddress = userReader.GetString(3);
-                user.Address1 = userReader.GetString(4);
-                user.ZipCode = userReader.GetInt32(5);
+                user.Address = userReader.GetString(4);
+                user.ZipCode = userReader.GetString(5);
                 user.State = userReader.GetString(6);
             }
 
             // Get list of watches in the order
-            cmdText = $"SELECT orderId, watchID, quantity FROM dbo.ItemLine WHERE orderId=@orderId;";
+            cmdText = $"SELECT OrderId, WatchID, Quantity FROM dbo.itemLine WHERE OrderId=@orderId;";
 
             using SqlCommand orderCmd = new SqlCommand(cmdText, connection);
             orderCmd.Parameters.AddWithValue("@orderId", orderId);
@@ -195,7 +223,7 @@ namespace Timelapse.Repo
             // get list of watches per order
             foreach (var watch in watches)
             {
-                cmdText = $"SELECT watchId, watchBrand, watchName FROM dbo.Watches WHERE watchId=@watchId";
+                cmdText = $"SELECT WatchId, WatchBrand, WatchName, Price FROM dbo.watches WHERE WatchId=@watchId";
                 using SqlCommand watchCmd = new SqlCommand(cmdText, connection);
                 watchCmd.Parameters.AddWithValue("@watchId", watch.WatchId);
                 using SqlDataReader watchReader = await watchCmd.ExecuteReaderAsync();
@@ -204,9 +232,10 @@ namespace Timelapse.Repo
                 {
                     Guid watchId = watchReader.GetGuid(0);
                     string brand = watchReader.GetString(1);
-                    string name = watchReader.GetString(1);
+                    string name = watchReader.GetString(2);
+                    double price = watchReader.GetDouble(3);
 
-                    Watch tempWatch = new Watch(watchId, brand, name);
+                    Watch tempWatch = new Watch(watchId, brand, name, price);
                     watch.Model = tempWatch;
                 }
             }
